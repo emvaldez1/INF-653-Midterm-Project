@@ -1,0 +1,27 @@
+# Ignore environment files and secrets
+.env
+.htaccess
+
+# Ignore vendor dependencies (if using Composer)
+vendor/
+
+# Ignore IDE/editor settings
+.vscode/
+.idea/
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore node_modules just in case
+node_modules/
+
+# Ignore backup or temporary files
+*.bak
+*.tmp
+
+# Ignore logs
+*.log
+
+# Ignore uploads (optional)
+uploads/
