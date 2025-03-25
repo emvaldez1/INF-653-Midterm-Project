@@ -35,7 +35,7 @@ switch ($method) {
             }
         } else {
             // Fetch all authors
-            $result = $author->read();  // Changed from readAll() to read()
+            $result = $author->read(); 
             $num = $result->rowCount();
 
             if ($num > 0) {
