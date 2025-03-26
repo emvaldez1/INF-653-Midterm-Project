@@ -14,15 +14,12 @@ class Database {
         $this->conn = null;
 
         try {
-            // Prepare the DSN (Data Source Name) for PostgreSQL
-            $dsn = 'pgsql:host=' . $this->host . ';port=5432;dbname=' . $this->db_name . ';options=\'--client_encoding=UTF8\'';
-
-            // Create a new PDO connection
+            $dsn = 'pgsql:host=' . $this->host . ';dbname=' . $this->db_name;
             $this->conn = new PDO($dsn, $this->username, $this->password);
-            // Set PDO error mode to exception
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch(PDOException $e) {
-            echo 'Connection Error: ' . $e->getMessage();
+            echo json_encode(['error' => 'Connection Error: ' . $e->getMessage()]);
+            exit;
         }
 
         return $this->conn;
