@@ -2,7 +2,7 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
+header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
 include_once '../../config/Database.php';
 include_once '../../models/Quote.php';
@@ -20,7 +20,6 @@ if (!empty($data->quote) && !empty($data->author_id) && !empty($data->category_i
     $quote->category_id = $data->category_id;
 
     if ($quote->create()) {
-        http_response_code(201); // Created
         echo json_encode([
             'id' => $quote->id,
             'quote' => $quote->quote,
@@ -28,10 +27,10 @@ if (!empty($data->quote) && !empty($data->author_id) && !empty($data->category_i
             'category_id' => $quote->category_id
         ]);
     } else {
-        http_response_code(500); // Internal Server Error
-        echo json_encode(['message' => 'Quote Not Created']);
+        http_response_code(404);
+        echo json_encode(['message' => 'Author or Category Not Found']);
     }
 } else {
-    http_response_code(400); // Bad Request
+    http_response_code(400);
     echo json_encode(['message' => 'Missing Required Parameters']);
 }
