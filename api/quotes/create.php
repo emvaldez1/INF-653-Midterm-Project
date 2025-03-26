@@ -9,8 +9,8 @@ include_once '../../models/Quote.php';
 
 $database = new Database();
 $db = $database->connect();
-$quote = new Quote($db);
 
+$quote = new Quote($db);
 $data = json_decode(file_get_contents("php://input"));
 
 if (!empty($data->quote) && !empty($data->author_id) && !empty($data->category_id)) {
