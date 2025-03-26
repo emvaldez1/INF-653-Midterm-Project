@@ -4,17 +4,24 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: DELETE');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-include_once __DIR__ . '/../../config/Database.php';
-include_once __DIR__ . '/../../models/Author.php';
+include_once '../../config/Database.php';
+include_once '../../models/Author.php';
 
 $database = new Database();
-$db = the database->connect();
-$author = new Author($db);
-$data = json_decode(file_get_contents("php://input"));
-$author->id = $data->id;
+$db = $database->connect();
 
-if($author->delete()) {
-    echo json_encode(array('message' => 'Author Deleted'));
+$author = new Author($db);
+
+$data = json_decode(file_get_contents("php://input"));
+
+if (!empty($data->id)) {
+    $author->id = $data->id;
+
+    if ($author->delete()) {
+        echo json_encode(['id' => $author->id]);
+    } else {
+        echo json_encode(['message' => 'No Authors Found']);
+    }
 } else {
-    echo json_encode(array('message' => 'Author Not Deleted'));
+    echo json_encode(['message' => 'Missing Required Parameters']);
 }
