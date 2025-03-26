@@ -16,10 +16,38 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
-        $author->id = isset($_GET['id']) ? $_GET['id'] : null;
-        $response = $author->id ? $author->readSingle() : $author->read();
-        http_response_code(200);
-        echo json_encode($response);
+        if (isset($_GET['id'])) {
+            $author->id = $_GET['id'];
+            $author->readSingle();
+            if ($author->author) {
+                http_response_code(200);
+                echo json_encode([
+                    'id' => $author->id,
+                    'author' => $author->author
+                ]);
+            } else {
+                http_response_code(404);
+                echo json_encode(['message' => 'No Authors Found']);
+            }
+        } else {
+            $result = $author->read();
+            $num = $result->rowCount();
+
+            if ($num > 0) {
+                $authors_arr = [];
+                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                    $authors_arr[] = [
+                        'id' => $row['id'],
+                        'author' => $row['author']
+                    ];
+                }
+                http_response_code(200);
+                echo json_encode($authors_arr);
+            } else {
+                http_response_code(404);
+                echo json_encode(['message' => 'No Authors Found']);
+            }
+        }
         break;
 
     case 'POST':
@@ -28,7 +56,10 @@ switch ($method) {
             $author->author = $data->author;
             if ($author->create()) {
                 http_response_code(201);
-                echo json_encode(['id' => $author->id, 'author' => $author->author]);
+                echo json_encode([
+                    'id' => $author->id,
+                    'author' => $author->author
+                ]);
             } else {
                 http_response_code(500);
                 echo json_encode(['message' => 'Author Not Created']);
@@ -46,7 +77,10 @@ switch ($method) {
             $author->author = $data->author;
             if ($author->update()) {
                 http_response_code(200);
-                echo json_encode(['id' => $author->id, 'author' => $author->author]);
+                echo json_encode([
+                    'id' => $author->id,
+                    'author' => $author->author
+                ]);
             } else {
                 http_response_code(404);
                 echo json_encode(['message' => 'Author Not Found']);
