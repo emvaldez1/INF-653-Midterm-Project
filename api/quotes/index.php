@@ -1,5 +1,4 @@
 <?php
-// Headers required for CORS and Content-Type
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
@@ -8,51 +7,40 @@ header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type
 include_once '../../config/Database.php';
 include_once '../../models/Quote.php';
 
-// Instantiate DB & connect
 $database = new Database();
 $db = $database->connect();
 
-// Instantiate a Quote object
 $quote = new Quote($db);
 
-// Get the request method
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
         if (isset($_GET['id'])) {
-            include 'read_single.php';
-        } elseif (isset($_GET['author_id']) && isset($_GET['category_id'])) {
-            $quote->author_id = $_GET['author_id'];
-            $quote->category_id = $_GET['category_id'];
-            $result = $quote->readByAuthorAndCategory();
-        } elseif (isset($_GET['author_id'])) {
-            $quote->author_id = $_GET['author_id'];
-            $result = $quote->readByAuthor();
-        } elseif (isset($_GET['category_id'])) {
-            $quote->category_id = $_GET['category_id'];
-            $result = $quote->readByCategory();
-        } else {
-            include 'read.php';
-            break;
-        }
-
-        $num = $result->rowCount();
-        if ($num > 0) {
-            $quotes_arr = array();
-            while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                extract($row);
-                $quote_item = array(
-                    'id' => $id,
-                    'quote' => $quote,
-                    'author' => $author,
-                    'category' => $category
-                );
-                array_push($quotes_arr, $quote_item);
+            $quote->id = $_GET['id'];
+            $quote->readSingle();
+            if (!empty($quote->quote)) {
+                echo json_encode([
+                    'id' => $quote->id,
+                    'quote' => $quote->quote,
+                    'author' => $quote->author,
+                    'category' => $quote->category
+                ]);
+            } else {
+                echo json_encode(['message' => 'No Quotes Found']);
             }
-            echo json_encode($quotes_arr);
+        } elseif (isset($_GET['author_id']) && isset($_GET['category_id'])) {
+            $result = $quote->readByAuthorAndCategory($_GET['author_id'], $_GET['category_id']);
+            echo json_encode($result);
+        } elseif (isset($_GET['author_id'])) {
+            $result = $quote->readByAuthor($_GET['author_id']);
+            echo json_encode($result);
+        } elseif (isset($_GET['category_id'])) {
+            $result = $quote->readByCategory($_GET['category_id']);
+            echo json_encode($result);
         } else {
-            echo json_encode(array('message' => 'No Quotes Found'));
+            $result = $quote->read();
+            echo json_encode($result);
         }
         break;
 
@@ -70,6 +58,6 @@ switch ($method) {
 
     default:
         http_response_code(405);
-        echo json_encode(array('message' => 'Method Not Allowed'));
+        echo json_encode(['message' => 'Method Not Allowed']);
         break;
 }
