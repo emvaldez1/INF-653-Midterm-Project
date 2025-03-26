@@ -1,4 +1,5 @@
 <?php
+
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
@@ -7,21 +8,18 @@ header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Methods
 include_once '../../config/Database.php';
 include_once '../../models/Quote.php';
 
-// Instantiate DB & connect
 $database = new Database();
 $db = $database->connect();
 
-// Instantiate a Quote object
 $quote = new Quote($db);
 
-// Get the request method
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
-        $quote->id = isset($_GET['id']) ? $_GET['id'] : null;
-        $quote->author_id = isset($_GET['author_id']) ? $_GET['author_id'] : null;
-        $quote->category_id = isset($_GET['category_id']) ? $_GET['category_id'] : null;
+        $quote->id = $_GET['id'] ?? null;
+        $quote->author_id = $_GET['author_id'] ?? null;
+        $quote->category_id = $_GET['category_id'] ?? null;
 
         if ($quote->id) {
             $quote->readSingle();
@@ -41,15 +39,14 @@ switch ($method) {
 
             if ($num > 0) {
                 $quotes_arr = [];
+
                 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                    extract($row);
-                    $quote_item = [
-                        'id' => $id,
-                        'quote' => $quote,
-                        'author' => $author,
-                        'category' => $category
+                    $quotes_arr[] = [
+                        'id' => $row['id'],
+                        'quote' => $row['quote'],
+                        'author' => $row['author'],
+                        'category' => $row['category']
                     ];
-                    array_push($quotes_arr, $quote_item);
                 }
                 echo json_encode($quotes_arr);
             } else {
@@ -61,66 +58,53 @@ switch ($method) {
     case 'POST':
         $data = json_decode(file_get_contents("php://input"));
 
-        if (empty($data->quote) || empty($data->author_id) || empty($data->category_id)) {
-            echo json_encode(['message' => 'Missing Required Parameters']);
-            exit;
-        }
+        if (!empty($data->quote) && !empty($data->author_id) && !empty($data->category_id)) {
+            $quote->quote = $data->quote;
+            $quote->author_id = $data->author_id;
+            $quote->category_id = $data->category_id;
 
-        $quote->quote = $data->quote;
-        $quote->author_id = $data->author_id;
-        $quote->category_id = $data->category_id;
-
-        if ($quote->create()) {
-            echo json_encode([
-                'id' => $quote->id,
-                'quote' => $quote->quote,
-                'author_id' => $quote->author_id,
-                'category_id' => $quote->category_id
-            ]);
+            if ($quote->create()) {
+                echo json_encode(['id' => $quote->id, 'quote' => $quote->quote, 'author_id' => $quote->author_id, 'category_id' => $quote->category_id]);
+            } else {
+                echo json_encode(['message' => 'Quote Not Created']);
+            }
         } else {
-            echo json_encode(['message' => 'Quote Not Created']);
+            echo json_encode(['message' => 'Missing Required Parameters']);
         }
         break;
 
     case 'PUT':
         $data = json_decode(file_get_contents("php://input"));
 
-        if (empty($data->id) || empty($data->quote) || empty($data->author_id) || empty($data->category_id)) {
-            echo json_encode(['message' => 'Missing Required Parameters']);
-            exit;
-        }
+        if (!empty($data->id) && !empty($data->quote) && !empty($data->author_id) && !empty($data->category_id)) {
+            $quote->id = $data->id;
+            $quote->quote = $data->quote;
+            $quote->author_id = $data->author_id;
+            $quote->category_id = $data->category_id;
 
-        $quote->id = $data->id;
-        $quote->quote = $data->quote;
-        $quote->author_id = $data->author_id;
-        $quote->category_id = $data->category_id;
-
-        if ($quote->update()) {
-            echo json_encode([
-                'id' => $quote->id,
-                'quote' => $quote->quote,
-                'author_id' => $quote->author_id,
-                'category_id' => $quote->category_id
-            ]);
+            if ($quote->update()) {
+                echo json_encode(['id' => $quote->id, 'quote' => $quote->quote, 'author_id' => $quote->author_id, 'category_id' => $quote->category_id]);
+            } else {
+                echo json_encode(['message' => 'Quote Not Updated']);
+            }
         } else {
-            echo json_encode(['message' => 'No Quotes Found']);
+            echo json_encode(['message' => 'Missing Required Parameters']);
         }
         break;
 
     case 'DELETE':
         $data = json_decode(file_get_contents("php://input"));
 
-        if (empty($data->id)) {
-            echo json_encode(['message' => 'Missing Required Parameters']);
-            exit;
-        }
+        if (!empty($data->id)) {
+            $quote->id = $data->id;
 
-        $quote->id = $data->id;
-
-        if ($quote->delete()) {
-            echo json_encode(['id' => $quote->id]);
+            if ($quote->delete()) {
+                echo json_encode(['id' => $quote->id]);
+            } else {
+                echo json_encode(['message' => 'No Quotes Found']);
+            }
         } else {
-            echo json_encode(['message' => 'No Quotes Found']);
+            echo json_encode(['message' => 'Missing Required Parameters']);
         }
         break;
 
