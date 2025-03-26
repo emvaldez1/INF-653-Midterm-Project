@@ -21,7 +21,7 @@ class Quote {
                   LEFT JOIN categories c ON q.category_id = c.id";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt;
     }
 
     public function readSingle() {
@@ -40,43 +40,6 @@ class Quote {
             $this->author = $row['author'];
             $this->category = $row['category'];
         }
-    }
-
-    public function readByAuthor($author_id) {
-        $query = "SELECT q.id, q.quote, a.author, c.category
-                  FROM {$this->table} q
-                  LEFT JOIN authors a ON q.author_id = a.id
-                  LEFT JOIN categories c ON q.category_id = c.id
-                  WHERE q.author_id = :author_id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':author_id', $author_id);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function readByCategory($category_id) {
-        $query = "SELECT q.id, q.quote, a.author, c.category
-                  FROM {$this->table} q
-                  LEFT JOIN authors a ON q.author_id = a.id
-                  LEFT JOIN categories c ON q.category_id = c.id
-                  WHERE q.category_id = :category_id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':category_id', $category_id);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function readByAuthorAndCategory($author_id, $category_id) {
-        $query = "SELECT q.id, q.quote, a.author, c.category
-                  FROM {$this->table} q
-                  LEFT JOIN authors a ON q.author_id = a.id
-                  LEFT JOIN categories c ON q.category_id = c.id
-                  WHERE q.author_id = :author_id AND q.category_id = :category_id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':author_id', $author_id);
-        $stmt->bindParam(':category_id', $category_id);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function create() {
