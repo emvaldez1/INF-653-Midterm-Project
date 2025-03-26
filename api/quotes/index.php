@@ -41,11 +41,12 @@ switch ($method) {
                 $quotes_arr = [];
 
                 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                    extract($row);
                     $quotes_arr[] = [
-                        'id' => $row['id'],
-                        'quote' => $row['quote'],
-                        'author' => $row['author'],
-                        'category' => $row['category']
+                        'id' => $id,
+                        'quote' => $quote,
+                        'author' => $author,
+                        'category' => $category
                     ];
                 }
                 echo json_encode($quotes_arr);
