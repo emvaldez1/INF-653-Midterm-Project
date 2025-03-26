@@ -1,5 +1,9 @@
 <?php
 
+ini_set('display_errors', 0); // Turn off displaying errors
+error_reporting(E_ALL); // Report all errors internally
+
+
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
