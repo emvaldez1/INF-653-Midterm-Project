@@ -1,4 +1,8 @@
 <?php
+
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
 // Set headers for CORS and content type
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
