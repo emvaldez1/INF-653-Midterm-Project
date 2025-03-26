@@ -2,25 +2,38 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
-include_once __DIR__ . '/../../config/Database.php';
-include_once __DIR__ . '/../../models/Category.php';
+include_once '../../config/Database.php';
+include_once '../../models/Category.php';
 
 $database = new Database();
 $db = $database->connect();
 
+if (!$db) {
+    http_response_code(500);
+    echo json_encode(['message' => 'Database connection failed']);
+    exit;
+}
+
 $category = new Category($db);
 
-$category->id = isset($_GET['id']) ? $_GET['id'] : die();
+// Check if ID is provided and is a valid number
+if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
+    http_response_code(400);
+    echo json_encode(['message' => 'Missing or invalid ID']);
+    exit;
+}
 
+$category->id = $_GET['id'];
 $category->readSingle();
 
-if($category->name != null) {
-    $category_arr = array(
+if ($category->category != null) {
+    $category_arr = [
         'id' => $category->id,
-        'category' => $category->name
-    );
-
+        'category' => $category->category
+    ];
+    http_response_code(200);
     echo json_encode($category_arr);
 } else {
-    echo json_encode(array('message' => 'Category Not Found'));
+    http_response_code(404);
+    echo json_encode(['message' => 'Category Not Found with ID ' . $category->id]);
 }
