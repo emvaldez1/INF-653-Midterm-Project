@@ -9,7 +9,6 @@ include_once '../../models/Category.php';
 
 $database = new Database();
 $db = $database->connect();
-
 $category = new Category($db);
 
 $data = json_decode(file_get_contents("php://input"));
@@ -24,8 +23,10 @@ if (!empty($data->id) && !empty($data->category)) {
             'category' => $category->category
         ]);
     } else {
-        echo json_encode(['message' => 'No Categories Found']);
+        http_response_code(404);
+        echo json_encode(['message' => 'Category Not Updated']);
     }
 } else {
+    http_response_code(400);
     echo json_encode(['message' => 'Missing Required Parameters']);
 }
