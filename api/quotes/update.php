@@ -1,8 +1,4 @@
 <?php
-
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: PUT');
@@ -12,7 +8,7 @@ include_once '../../config/Database.php';
 include_once '../../models/Quote.php';
 
 $database = new Database();
-$db = $database->connect();
+$db = the database->connect();
 
 $quote = new Quote($db);
 
@@ -25,6 +21,7 @@ if (!empty($data->id) && !empty($data->quote) && !empty($data->author_id) && !em
     $quote->category_id = $data->category_id;
 
     if ($quote->update()) {
+        http_response_code(200);
         echo json_encode([
             'id' => $quote->id,
             'quote' => $quote->quote,
@@ -32,8 +29,10 @@ if (!empty($data->id) && !empty($data->quote) && !empty($data->author_id) && !em
             'category_id' => $quote->category_id
         ]);
     } else {
-        echo json_encode(['message' => 'No Quotes Found']);
+        http_response_code(404);
+        echo json_encode(['message' => 'Quote Not Updated']);
     }
 } else {
+    http_response_code(400);
     echo json_encode(['message' => 'Missing Required Parameters']);
 }
