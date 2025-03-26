@@ -10,13 +10,13 @@ class Database {
     private $password = 'SU5971hNKDk2IeVbBBfz09jsCdqETpSg'; // Password
 
     // Get the database connection
- public function connect() {
+    public function connect() {
         $this->conn = null;
         try {
             $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->db_name;
             $this->conn = new PDO($dsn, $this->username, $this->password);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             echo 'Connection Error: ' . $e->getMessage();
         }
         return $this->conn;
