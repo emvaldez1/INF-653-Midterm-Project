@@ -8,7 +8,7 @@ include_once '../../config/Database.php';
 include_once '../../models/Category.php';
 
 $database = new Database();
-$db = the database->connect();
+$db = $database->connect();
 $category = new Category($db);
 
 $data = json_decode(file_get_contents("php://input"));
