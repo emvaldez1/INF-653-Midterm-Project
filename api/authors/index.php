@@ -1,45 +1,44 @@
 <?php
-// File: api/authors/index.php
-// Allow any origin and JSON content type
-header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
-
-// Handle CORS preflight request (OPTIONS method)
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
-    header('Access-Control-Allow-Headers: Origin, Accept, Content-Type, X-Requested-With');
-    exit(0); // Stop further execution for OPTIONS
-}
-
-// Include database and model classes
-require_once '../../config/Database.php';
-require_once '../../models/Author.php';
-require_once '../../models/Category.php';   // Might be used in cross-checks for quotes
-require_once '../../models/Quote.php';      // Might be used in cross-checks
+include_once '../../config/Database.php';
+include_once '../../models/Author.php';
 
 // Instantiate DB & connect
 $database = new Database();
 $db = $database->connect();
 
-// Instantiate models
+// Instantiate an author object
 $author = new Author($db);
-$category = new Category($db);
-$quote = new Quote($db);
 
-// Route to appropriate method script
-$method = $_SERVER['REQUEST_METHOD'];
-switch ($method) {
-    case 'GET':
-        include 'read.php';    break;
-    case 'POST':
-        include 'create.php';  break;
-    case 'PUT':
-        include 'update.php';  break;
-    case 'DELETE':
-        include 'delete.php';  break;
-    default:
-        // If an unsupported method is called, return 405 Method Not Allowed
-        http_response_code(405);
-        echo json_encode(['message' => 'Method Not Allowed']);
+// Check if ID is provided for single author, else get all
+$id = isset($_GET['id']) ? $_GET['id'] : null;
+
+if ($id) {
+    $author->id = $id;
+    if ($author->read_single()) {
+        $author_arr = array(
+            'id' => $author->id,
+            'author' => $author->author
+        );
+        echo json_encode($author_arr);
+    } else {
+        http_response_code(404);
+        echo json_encode(['message' => 'Author Not Found']);
+    }
+} else {
+    $result = $author->read();
+    $authors_arr = array();
+    $authors_arr['data'] = array();
+
+    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        extract($row);
+        $author_item = array(
+            'id' => $id,
+            'author' => $author
+        );
+        array_push($authors_arr['data'], $author_item);
+    }
+
+    echo json_encode($authors_arr);
 }
 ?>
