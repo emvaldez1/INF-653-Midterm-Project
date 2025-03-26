@@ -22,7 +22,6 @@ class Author {
         $stmt = $this->conn->prepare($query);
         $this->author = htmlspecialchars(strip_tags($this->author));
         $stmt->bindParam(':author', $this->author);
-
         if ($stmt->execute()) {
             return true;
         }
@@ -32,10 +31,10 @@ class Author {
     public function update() {
         $query = 'UPDATE ' . $this->table_name . ' SET author = :author WHERE id = :id';
         $stmt = $this->conn->prepare($query);
+        $this->id = htmlspecialchars(strip_tags($this->id));
         $this->author = htmlspecialchars(strip_tags($this->author));
-        $stmt->bindParam(':author', $this->author);
         $stmt->bindParam(':id', $this->id);
-
+        $stmt->bindParam(':author', $this->author);
         if ($stmt->execute()) {
             return true;
         }
@@ -46,7 +45,6 @@ class Author {
         $query = 'DELETE FROM ' . $this->table_name . ' WHERE id = :id';
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $this->id);
-
         if ($stmt->execute()) {
             return true;
         }
