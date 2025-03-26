@@ -9,19 +9,19 @@ class Database {
     private $username = 'inf653_midtermproj_user'; // Username
     private $password = 'SU5971hNKDk2IeVbBBfz09jsCdqETpSg'; // Password
 
-    // Get the database connection
+// DB Connect
     public function connect() {
         $this->conn = null;
-
         try {
-            $dsn = 'pgsql:host=' . $this->host . ';dbname=' . $this->db_name;
+            // Create PDO connection string for PostgreSQL
+            $dsn = "pgsql:host={$this->host};port={$this->port};dbname={$this->db_name}";
             $this->conn = new PDO($dsn, $this->username, $this->password);
+            // Set PDO error mode to exception for error handling
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch(PDOException $e) {
-            echo json_encode(['error' => 'Connection Error: ' . $e->getMessage()]);
-            exit;
+            echo "Connection Error: " . $e->getMessage();
+            exit();
         }
-
         return $this->conn;
     }
 }
