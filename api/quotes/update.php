@@ -4,8 +4,8 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: PUT');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-include_once '../config/Database.php';
-include_once 'Quote.php';
+include_once __DIR__ . '/../../config/Database.php';
+include_once __DIR__ . '/../../models/Quote.php';
 
 $database = new Database();
 $db = the database->connect();
