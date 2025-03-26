@@ -16,8 +16,9 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
-        if (isset($_GET['id'])) {
-            $author->id = $_GET['id'];
+        $author->id = isset($_GET['id']) ? $_GET['id'] : null;
+
+        if ($author->id) {
             $author->readSingle();
             if ($author->author) {
                 http_response_code(200);
@@ -27,7 +28,7 @@ switch ($method) {
                 ]);
             } else {
                 http_response_code(404);
-                echo json_encode(['message' => 'No Authors Found']);
+                echo json_encode(['message' => 'Author Not Found']);
             }
         } else {
             $result = $author->read();
@@ -35,13 +36,14 @@ switch ($method) {
 
             if ($num > 0) {
                 $authors_arr = [];
+
                 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                    extract($row);
                     $authors_arr[] = [
-                        'id' => $row['id'],
-                        'author' => $row['author']
+                        'id' => $id,
+                        'author' => $author
                     ];
                 }
-                http_response_code(200);
                 echo json_encode($authors_arr);
             } else {
                 http_response_code(404);
@@ -52,14 +54,13 @@ switch ($method) {
 
     case 'POST':
         $data = json_decode(file_get_contents("php://input"));
+
         if (!empty($data->author)) {
             $author->author = $data->author;
+
             if ($author->create()) {
                 http_response_code(201);
-                echo json_encode([
-                    'id' => $author->id,
-                    'author' => $author->author
-                ]);
+                echo json_encode(['id' => $author->id, 'author' => $author->author]);
             } else {
                 http_response_code(500);
                 echo json_encode(['message' => 'Author Not Created']);
@@ -72,18 +73,17 @@ switch ($method) {
 
     case 'PUT':
         $data = json_decode(file_get_contents("php://input"));
+
         if (!empty($data->id) && !empty($data->author)) {
             $author->id = $data->id;
             $author->author = $data->author;
+
             if ($author->update()) {
                 http_response_code(200);
-                echo json_encode([
-                    'id' => $author->id,
-                    'author' => $author->author
-                ]);
+                echo json_encode(['id' => $author->id, 'author' => $author->author]);
             } else {
                 http_response_code(404);
-                echo json_encode(['message' => 'Author Not Found']);
+                echo json_encode(['message' => 'Author Not Updated']);
             }
         } else {
             http_response_code(400);
@@ -93,8 +93,10 @@ switch ($method) {
 
     case 'DELETE':
         $data = json_decode(file_get_contents("php://input"));
+
         if (!empty($data->id)) {
             $author->id = $data->id;
+
             if ($author->delete()) {
                 http_response_code(200);
                 echo json_encode(['id' => $author->id]);
