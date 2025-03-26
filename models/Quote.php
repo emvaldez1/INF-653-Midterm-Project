@@ -19,8 +19,8 @@ class Quote {
     public function read() {
         $query = "SELECT q.id, q.quote, a.author, c.category 
                   FROM quotes q 
-                  JOIN authors a ON q.authorId = a.id 
-                  JOIN categories c ON q.categoryId = c.id
+                  JOIN authors a ON q.author_id = a.id 
+                  JOIN categories c ON q.category_id = c.id
                   ORDER BY q.id";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
