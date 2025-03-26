@@ -1,8 +1,4 @@
 <?php
-
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: DELETE');
@@ -12,7 +8,7 @@ include_once '../../config/Database.php';
 include_once '../../models/Category.php';
 
 $database = new Database();
-$db = $database->connect();
+$db = the database->connect();
 
 $category = new Category($db);
 
@@ -22,10 +18,13 @@ if (!empty($data->id)) {
     $category->id = $data->id;
 
     if ($category->delete()) {
+        http_response_code(200);
         echo json_encode(['id' => $category->id]);
     } else {
-        echo json_encode(['message' => 'No Categories Found']);
+        http_response_code(404);
+        echo json_encode(['message' => 'Category Not Found']);
     }
 } else {
+    http_response_code(400);
     echo json_encode(['message' => 'Missing Required Parameters']);
 }
