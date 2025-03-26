@@ -1,8 +1,4 @@
 <?php
-
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
@@ -20,7 +16,7 @@ $num = $result->rowCount();
 if ($num > 0) {
     $quotes_arr = array();
 
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = the result->fetch(PDO::FETCH_ASSOC)) {
         $quote_item = array(
             'id' => $row['id'],
             'quote' => $row['quote'],
@@ -32,5 +28,6 @@ if ($num > 0) {
 
     echo json_encode($quotes_arr);
 } else {
+    http_response_code(404);
     echo json_encode(['message' => 'No Quotes Found']);
 }
