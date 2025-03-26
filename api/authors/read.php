@@ -1,33 +1,49 @@
 <?php
-// If an 'id' parameter is present, delegate to read a single author
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
+header('Access-Control-Allow-Methods: GET');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+
+include_once '../../config/Database.php';
+include_once '../../models/Author.php';
+
+$database = new Database();
+$db = $database->connect();
+
+$author = new Author($db);
+
 if (isset($_GET['id'])) {
-    // Prepare the author with the given id
-    $author->id = intval($_GET['id']);
-    if ($author->read_single()) {
-        // Author found, output JSON
+    $author->id = $_GET['id'];
+
+    if($author->readSingle()) {
         echo json_encode([
             'id' => $author->id,
             'author' => $author->author
         ]);
     } else {
-        // Author not found
-        http_response_code(404);
-        echo json_encode(['message' => 'authorId Not Found']);
+        http_response_code(404); // Not Found
+        echo json_encode(['message' => 'Author Not Found']);
     }
 } else {
-    // No ID specified: retrieve all authors
     $result = $author->read();
-    $rowCount = $result->rowCount();
-    if ($rowCount > 0) {
-        $authorsArr = [];
+    $num = $result->rowCount();
+
+    if ($num > 0) {
+        $authors_arr = [];
+
         while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-            $authorsArr[] = [
-                'id' => $row['id'],
-                'author' => $row['author']
+            extract($row);
+            $author_item = [
+                'id' => $id,
+                'author' => $author
             ];
+
+            array_push($authors_arr, $author_item);
         }
-        echo json_encode($authorsArr);
+
+        echo json_encode($authors_arr);
     } else {
+        http_response_code(404); // Not Found
         echo json_encode(['message' => 'No Authors Found']);
     }
 }
