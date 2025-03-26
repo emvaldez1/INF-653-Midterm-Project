@@ -7,16 +7,15 @@ class Quote {
     public $quote;
     public $author_id;
     public $category_id;
-    public $author_name;  // Optional, used for joins
-    public $category_name; // Optional, used for joins
+    public $author_name;  // Optional for joins
+    public $category_name; // Optional for joins
 
     public function __construct($db) {
         $this->conn = $db;
     }
 
     public function read() {
-        $query = 'SELECT q.id, q.quote, a.author as author_name, c.category as category_name 
-                  FROM ' . $this->table . ' q
+        $query = 'SELECT q.id, q.quote, a.author as author_name, c.category as category_name FROM ' . $this->table . ' q
                   JOIN authors a ON q.author_id = a.id
                   JOIN categories c ON q.category_id = c.id';
         $stmt = $this->conn->prepare($query);
@@ -25,8 +24,7 @@ class Quote {
     }
 
     public function create() {
-        $query = 'INSERT INTO ' . $this->table . ' (quote, author_id, category_id) 
-                  VALUES (:quote, :author_id, :category_id)';
+        $query = 'INSERT INTO ' . $this->table . ' (quote, author_id, category_id) VALUES (:quote, :author_id, :category_id)';
         $stmt = $this->conn->prepare($query);
         $this->quote = htmlspecialchars(strip_tags($this->quote));
         $this->author_id = htmlspecialchars(strip_tags($this->author_id));
@@ -43,8 +41,7 @@ class Quote {
     }
 
     public function update() {
-        $query = 'UPDATE ' . $this->table . ' SET quote = :quote, author_id = :author_id, category_id = :category_id 
-                  WHERE id = :id';
+        $query = 'UPDATE ' . $this->table . ' SET quote = :quote, author_id = :author_id, category_id = :category_id WHERE id = :id';
         $stmt = $this->conn->prepare($query);
         $this->id = htmlspecialchars(strip_tags($this->id));
         $this->quote = htmlspecialchars(strip_tags($this->quote));
