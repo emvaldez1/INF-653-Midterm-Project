@@ -7,20 +7,26 @@ include_once '../../models/Category.php';
 
 $database = new Database();
 $db = $database->connect();
-$category = new Category($db);
 
+if (!$db) {
+    http_response_code(500);
+    echo json_encode(['message' => 'Database connection failed']);
+    exit;
+}
+
+$category = new Category($db);
 $result = $category->read();
 $num = $result->rowCount();
 
 if ($num > 0) {
-    $categories_arr = [];
+    $categories_arr = ['data' => []];
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
         extract($row);
         $category_item = [
             'id' => $id,
             'category' => $category
         ];
-        array_push($categories_arr, $category_item);
+        array_push($categories_arr['data'], $category_item);
     }
     echo json_encode($categories_arr);
 } else {
