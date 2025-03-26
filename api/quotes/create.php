@@ -1,53 +1,39 @@
 <?php
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+
+include_once '../../config/Database.php';
+include_once '../../models/Quote.php';
+
+$database = new Database();
+$db = $database->connect();
+
+$quote = new Quote($db);
+
 $data = json_decode(file_get_contents("php://input"));
-// Validate all required fields: 'quote', 'authorId', 'categoryId'
-if (!empty($data->quote) && !empty($data->authorId) && !empty($data->categoryId)) {
-    // Assign data
+
+if (!empty($data->quote) && !empty($data->author_id) && !empty($data->category_id)) {
     $quote->quote = $data->quote;
-    $quote->authorId = intval($data->authorId);
-    $quote->categoryId = intval($data->categoryId);
+    $quote->author_id = $data->author_id;
+    $quote->category_id = $data->category_id;
 
-    // Verify that provided authorId exists
-    $author->id = $quote->authorId;
-    $authorExists = $author->read_single();
-
-    // Verify that provided categoryId exists
-    $category->id = $quote->categoryId;
-    $categoryExists = $category->read_single();
-
-    if (!$authorExists || !$categoryExists) {
-        // If either foreign key doesn't exist, do not create quote
-        http_response_code(404);
-        if (!$authorExists && !$categoryExists) {
-            echo json_encode(['message' => 'authorId and categoryId Not Found']);
-        } else if (!$authorExists) {
-            echo json_encode(['message' => 'authorId Not Found']);
-        } else {
-            echo json_encode(['message' => 'categoryId Not Found']);
-        }
+    if ($quote->create()) {
+        echo json_encode([
+            'id' => $quote->id,
+            'quote' => $quote->quote,
+            'author_id' => $quote->author_id,
+            'category_id' => $quote->category_id
+        ]);
+        http_response_code(201); // Created
     } else {
-        // Both foreign keys are valid, attempt to create quote
-        if ($quote->create()) {
-            $newId = $db->lastInsertId();
-            // Fetch the newly created quote to include author/category names in response
-            $quote->id = $newId;
-            $quote->read_single();
-            echo json_encode([
-                'id' => $newId,
-                'quote' => $quote->quote,
-                'author' => $quote->author,
-                'category' => $quote->category
-            ]);
-            http_response_code(201);
-        } else {
-            echo json_encode(['message' => 'Quote Not Created']);
-            http_response_code(500);
-        }
+        http_response_code(500); // Server error
+        echo json_encode(['message' => 'Quote Not Created']);
     }
 } else {
-    // If any required field is missing
+    http_response_code(400); // Bad request
     echo json_encode(['message' => 'Missing Required Parameters']);
-    http_response_code(400);
 }
 exit();
 ?>
