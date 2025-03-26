@@ -4,11 +4,11 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: PUT');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-include_once __DIR__ . '/../../config/Database.php';
-include_once __DIR__ . '/../../models/Quote.php';
+include_once '../../config/Database.php';
+include_once '../../models/Quote.php';
 
 $database = new Database();
-$db = the database->connect();
+$db = $database->connect();
 
 $quote = new Quote($db);
 
@@ -20,11 +20,16 @@ if (!empty($data->id) && !empty($data->quote) && !empty($data->author_id) && !em
     $quote->author_id = $data->author_id;
     $quote->category_id = $data->category_id;
 
-    if($quote->update()) {
-        echo json_encode(array('message' => 'Quote Updated'));
+    if ($quote->update()) {
+        echo json_encode([
+            'id' => $quote->id,
+            'quote' => $quote->quote,
+            'author_id' => $quote->author_id,
+            'category_id' => $quote->category_id
+        ]);
     } else {
-        echo json_encode(array('message' => 'Quote Not Updated'));
+        echo json_encode(['message' => 'No Quotes Found']);
     }
 } else {
-    echo json_encode(array('message' => 'Missing required data'));
+    echo json_encode(['message' => 'Missing Required Parameters']);
 }
