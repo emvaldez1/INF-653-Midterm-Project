@@ -4,8 +4,8 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: PUT');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-include_once __DIR__ . '/../../config/Database.php';
-include_once __DIR__ . '/../../models/Category.php';
+include_once '../../config/Database.php';
+include_once '../../models/Category.php';
 
 $database = new Database();
 $db = $database->connect();
@@ -18,11 +18,14 @@ if (!empty($data->id) && !empty($data->category)) {
     $category->id = $data->id;
     $category->category = $data->category;
 
-    if($category->update()) {
-        echo json_encode(['message' => 'Category Updated']);
+    if ($category->update()) {
+        echo json_encode([
+            'id' => $category->id,
+            'category' => $category->category
+        ]);
     } else {
-        echo json_encode(['message' => 'Category Not Updated']);
+        echo json_encode(['message' => 'No Categories Found']);
     }
 } else {
-    echo json_encode(['message' => 'Missing Required Data']);
+    echo json_encode(['message' => 'Missing Required Parameters']);
 }
