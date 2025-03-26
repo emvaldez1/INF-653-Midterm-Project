@@ -1,8 +1,4 @@
 <?php
-
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: POST');
@@ -22,13 +18,16 @@ if (!empty($data->category)) {
     $category->category = $data->category;
 
     if ($category->create()) {
+        http_response_code(201);
         echo json_encode([
             'id' => $category->id,
             'category' => $category->category
         ]);
     } else {
+        http_response_code(500);
         echo json_encode(['message' => 'Category Not Created']);
     }
 } else {
+    http_response_code(400);
     echo json_encode(['message' => 'Missing Required Parameters']);
 }
