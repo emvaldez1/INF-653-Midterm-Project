@@ -19,9 +19,6 @@ if (!empty($data->quote) && !empty($data->author_id) && !empty($data->category_i
     $quote->author_id = $data->author_id;
     $quote->category_id = $data->category_id;
 
-    // Check if author or category exist (optional but required for better validation)
-    // You may want to implement Author and Category class lookups here.
-
     if ($quote->create()) {
         echo json_encode([
             'id' => $quote->id,
