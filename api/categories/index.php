@@ -5,45 +5,42 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
 include_once '../../config/Database.php';
-include_once '../../models/Category.php';
+include_once '../../models/Quote.php';
 
 $database = new Database();
 $db = $database->connect();
 
-$category = new Category($db);
+$quote = new Quote($db);
 
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
         if (isset($_GET['id'])) {
-            $category->id = $_GET['id'];
-            $category->readSingle();
-            if (!empty($category->category)) {
+            $quote->id = $_GET['id'];
+            $quote->readSingle();
+            if (!empty($quote->quote)) {
                 echo json_encode([
-                    'id' => $category->id,
-                    'category' => $category->category
+                    'id' => $quote->id,
+                    'quote' => $quote->quote,
+                    'author' => $quote->author,
+                    'category' => $quote->category
                 ]);
             } else {
-                echo json_encode(['message' => 'category_id Not Found']);
+                echo json_encode(['message' => 'No Quotes Found']);
             }
+        } elseif (isset($_GET['author_id']) && isset($_GET['category_id'])) {
+            $result = $quote->readByAuthorAndCategory($_GET['author_id'], $_GET['category_id']);
+            echo json_encode($result);
+        } elseif (isset($_GET['author_id'])) {
+            $result = $quote->readByAuthor($_GET['author_id']);
+            echo json_encode($result);
+        } elseif (isset($_GET['category_id'])) {
+            $result = $quote->readByCategory($_GET['category_id']);
+            echo json_encode($result);
         } else {
-            $result = $category->read();
-            $num = $result->rowCount();
-
-            if ($num > 0) {
-                $categories_arr = [];
-                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                    extract($row);
-                    $categories_arr[] = [
-                        'id' => $id,
-                        'category' => $category
-                    ];
-                }
-                echo json_encode($categories_arr);
-            } else {
-                echo json_encode(['message' => 'No Categories Found']);
-            }
+            $result = $quote->read();
+            echo json_encode($result);
         }
         break;
 
