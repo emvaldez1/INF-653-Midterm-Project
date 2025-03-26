@@ -1,8 +1,4 @@
 <?php
-
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
@@ -13,24 +9,19 @@ $database = new Database();
 $db = $database->connect();
 
 $category = new Category($db);
-
 $result = $category->read();
 $num = $result->rowCount();
 
 if ($num > 0) {
     $categories_arr = array();
     $categories_arr['data'] = array();
-
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        extract($row);
-        $category_item = array(
-            'id' => $id,
-            'category' => $category
-        );
+        extract(row);
+        $category_item = array('id' => $id, 'category' => $category);
         array_push($categories_arr['data'], $category_item);
     }
-
     echo json_encode($categories_arr);
 } else {
-    echo json_encode(array('message' => 'No Categories Found'));
+    http_response_code(404);
+    echo json_encode(['message' => 'No Categories Found']);
 }
