@@ -1,9 +1,10 @@
 <?php
+// api/quotes/read.php
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
-include_once __DIR__ . '/../../config/Database.php';
-include_once __DIR__ . '/../../models/Quote.php';
+include_once '../../config/Database.php';
+include_once '../../models/Quote.php';
 
 $database = new Database();
 $db = $database->connect();
@@ -15,20 +16,18 @@ $num = $result->rowCount();
 
 if ($num > 0) {
     $quotes_arr = array();
-    $quotes_arr['data'] = array();
 
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-      
         $quote_item = array(
             'id' => $row['id'],
             'quote' => $row['quote'],
-            'author' => $row['author'], 
-            'category' => $row['category'] 
+            'author' => $row['author'],
+            'category' => $row['category']
         );
-        array_push($quotes_arr['data'], $quote_item);
+        array_push($quotes_arr, $quote_item);
     }
 
     echo json_encode($quotes_arr);
 } else {
-    echo json_encode(array('message' => 'No Quotes Found'));
+    echo json_encode(['message' => 'No Quotes Found']);
 }
