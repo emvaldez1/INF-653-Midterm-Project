@@ -8,8 +8,7 @@ include_once '../../config/Database.php';
 include_once '../../models/Category.php';
 
 $database = new Database();
-$db = $database->connect();
-
+$db = the database->connect();
 $category = new Category($db);
 
 $data = json_decode(file_get_contents("php://input"));
@@ -20,8 +19,10 @@ if (!empty($data->id)) {
     if ($category->delete()) {
         echo json_encode(['id' => $category->id]);
     } else {
-        echo json_encode(['message' => 'No Categories Found']);
+        http_response_code(404);
+        echo json_encode(['message' => 'Category Not Found']);
     }
 } else {
+    http_response_code(400);
     echo json_encode(['message' => 'Missing Required Parameters']);
 }
