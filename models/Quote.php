@@ -7,13 +7,14 @@ class Quote {
     public $quote;
     public $author_id;
     public $category_id;
-    public $author; // Joined author name
-    public $category; // Joined category name
+    public $author; // For joined author name
+    public $category; // For joined category name
 
     public function __construct($db) {
         $this->conn = $db;
     }
 
+    // READ all quotes (with author and category names)
     public function read() {
         $query = "SELECT q.id, q.quote, a.author, c.category 
                   FROM {$this->table} q 
@@ -25,6 +26,7 @@ class Quote {
         return $stmt;
     }
 
+    // READ single quote by q.id (with author and category)
     public function read_single() {
         $query = "SELECT q.id, q.quote, a.author, c.category 
                   FROM {$this->table} q 
@@ -44,6 +46,7 @@ class Quote {
         return false;
     }
 
+    // CREATE new quote (requires valid author_id and category_id)
     public function create() {
         $query = "INSERT INTO {$this->table} (quote, author_id, category_id) 
                   VALUES (:quote, :author_id, :category_id)";
@@ -53,25 +56,28 @@ class Quote {
         $this->category_id = htmlspecialchars(strip_tags($this->category_id));
         $stmt->bindParam(':quote', $this->quote);
         $stmt->bindParam(':author_id', $this->author_id, PDO::PARAM_INT);
-        $stmt->bindParam(':category_id', this->category_id, PDO::PARAM_INT);
+        $stmt->bindParam(':category_id', $this->category_id, PDO::PARAM_INT);
         return $stmt->execute();
     }
 
+    // UPDATE quote by id (requires valid new author_id and category_id)
     public function update() {
         $query = "UPDATE {$this->table} 
                   SET quote = :quote, author_id = :author_id, category_id = :category_id 
                   WHERE id = :id";
         $stmt = $this->conn->prepare($query);
+        $this->id = htmlspecialchars(strip_tags($this->id));
         $this->quote = htmlspecialchars(strip_tags($this->quote));
         $this->author_id = htmlspecialchars(strip_tags($this->author_id));
-        $this->category_id = htmlspecialchars(strip_tags(this->category_id));
+        $this->category_id = htmlspecialchars(strip_tags($this->category_id));
         $stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
         $stmt->bindParam(':quote', $this->quote);
         $stmt->bindParam(':author_id', $this->author_id, PDO::PARAM_INT);
-        $stmt->bindParam(':category_id', this->category_id, PDO::PARAM_INT);
+        $stmt->bindParam(':category_id', $this->category_id, PDO::PARAM_INT);
         return $stmt->execute();
     }
 
+    // DELETE quote by id
     public function delete() {
         $query = "DELETE FROM {$this->table} WHERE id = :id";
         $stmt = $this->conn->prepare($query);
