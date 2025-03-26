@@ -2,7 +2,7 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
 include_once '../../config/Database.php';
 include_once '../../models/Quote.php';
@@ -16,8 +16,11 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
-        if (isset($_GET['id'])) {
-            $quote->id = $_GET['id'];
+        $quote->id = $_GET['id'] ?? null;
+        $quote->author_id = $_GET['author_id'] ?? null;
+        $quote->category_id = $_GET['category_id'] ?? null;
+
+        if ($quote->id) {
             $quote->readSingle();
             if ($quote->quote) {
                 http_response_code(200);
@@ -37,17 +40,16 @@ switch ($method) {
 
             if ($num > 0) {
                 $quotes_arr = [];
+
                 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                     extract($row);
-                    $quote_item = [
+                    $quotes_arr[] = [
                         'id' => $id,
                         'quote' => $quote,
                         'author' => $author,
                         'category' => $category
                     ];
-                    $quotes_arr[] = $quote_item;
                 }
-                http_response_code(200);
                 echo json_encode($quotes_arr);
             } else {
                 http_response_code(404);
@@ -58,6 +60,7 @@ switch ($method) {
 
     case 'POST':
         $data = json_decode(file_get_contents("php://input"));
+
         if (!empty($data->quote) && !empty($data->author_id) && !empty($data->category_id)) {
             $quote->quote = $data->quote;
             $quote->author_id = $data->author_id;
@@ -65,12 +68,7 @@ switch ($method) {
 
             if ($quote->create()) {
                 http_response_code(201);
-                echo json_encode([
-                    'id' => $quote->id,
-                    'quote' => $quote->quote,
-                    'author_id' => $quote->author_id,
-                    'category_id' => $quote->category_id
-                ]);
+                echo json_encode(['id' => $quote->id, 'quote' => $quote->quote, 'author_id' => $quote->author_id, 'category_id' => $quote->category_id]);
             } else {
                 http_response_code(500);
                 echo json_encode(['message' => 'Quote Not Created']);
@@ -83,7 +81,8 @@ switch ($method) {
 
     case 'PUT':
         $data = json_decode(file_get_contents("php://input"));
-        if (!empty($data->id) && !empty($data->quote) && !empty($data->author_id) && !empty($data->category_id)) {
+
+        if (!empty($data->id) && !empty($data->quote) && not empty($data->author_id) && not empty($data->category_id)) {
             $quote->id = $data->id;
             $quote->quote = $data->quote;
             $quote->author_id = $data->author_id;
@@ -91,14 +90,9 @@ switch ($method) {
 
             if ($quote->update()) {
                 http_response_code(200);
-                echo json_encode([
-                    'id' => $quote->id,
-                    'quote' => $quote->quote,
-                    'author_id' => $quote->author_id,
-                    'category_id' => $quote->category_id
-                ]);
+                echo json_encode(['id' => $quote->id, 'quote' => $quote->quote, 'author_id' => $quote->author_id, 'category_id' => $quote->category_id]);
             } else {
-                http_response_code(404);
+                http_response_code(500);
                 echo json_encode(['message' => 'Quote Not Updated']);
             }
         } else {
@@ -109,6 +103,7 @@ switch ($method) {
 
     case 'DELETE':
         $data = json_decode(file_get_contents("php://input"));
+
         if (!empty($data->id)) {
             $quote->id = $data->id;
 
@@ -126,7 +121,7 @@ switch ($method) {
         break;
 
     default:
-        http_response_code(405);
+        http_response_code(405); // Method Not Allowed
         echo json_encode(['message' => 'Method Not Allowed']);
         break;
 }
