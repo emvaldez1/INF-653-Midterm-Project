@@ -1,117 +1,44 @@
 <?php
+// File: api/authors/index.php
+// Allow any origin and JSON content type
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 
-include_once '../../config/Database.php';
-include_once '../../models/Author.php';
+// Handle CORS preflight request (OPTIONS method)
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+    header('Access-Control-Allow-Headers: Origin, Accept, Content-Type, X-Requested-With');
+    exit(0); // Stop further execution for OPTIONS
+}
 
+// Include database and model classes
+require_once '../../config/Database.php';
+require_once '../../models/Author.php';
+require_once '../../models/Category.php';   // Might be used in cross-checks for quotes
+require_once '../../models/Quote.php';      // Might be used in cross-checks
+
+// Instantiate DB & connect
 $database = new Database();
 $db = $database->connect();
 
+// Instantiate models
 $author = new Author($db);
+$category = new Category($db);
+$quote = new Quote($db);
 
+// Route to appropriate method script
 $method = $_SERVER['REQUEST_METHOD'];
-
 switch ($method) {
     case 'GET':
-        $author->id = isset($_GET['id']) ? $_GET['id'] : null;
-
-        if ($author->id) {
-            $author->readSingle();
-            if ($author->author) {
-                http_response_code(200);
-                echo json_encode([
-                    'id' => $author->id,
-                    'author' => $author->author
-                ]);
-            } else {
-                http_response_code(404);
-                echo json_encode(['message' => 'Author Not Found']);
-            }
-        } else {
-            $result = $author->read();
-            $num = $result->rowCount();
-
-            if ($num > 0) {
-                $authors_arr = [];
-
-                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                    extract($row);
-                    $authors_arr[] = [
-                        'id' => $id,
-                        'author' => $author
-                    ];
-                }
-                echo json_encode($authors_arr);
-            } else {
-                http_response_code(404);
-                echo json_encode(['message' => 'No Authors Found']);
-            }
-        }
-        break;
-
+        include 'read.php';    break;
     case 'POST':
-        $data = json_decode(file_get_contents("php://input"));
-
-        if (!empty($data->author)) {
-            $author->author = $data->author;
-
-            if ($author->create()) {
-                http_response_code(201);
-                echo json_encode(['id' => $author->id, 'author' => $author->author]);
-            } else {
-                http_response_code(500);
-                echo json_encode(['message' => 'Author Not Created']);
-            }
-        } else {
-            http_response_code(400);
-            echo json_encode(['message' => 'Missing Required Parameters']);
-        }
-        break;
-
+        include 'create.php';  break;
     case 'PUT':
-        $data = json_decode(file_get_contents("php://input"));
-
-        if (!empty($data->id) && !empty($data->author)) {
-            $author->id = $data->id;
-            $author->author = $data->author;
-
-            if ($author->update()) {
-                http_response_code(200);
-                echo json_encode(['id' => $author->id, 'author' => $author->author]);
-            } else {
-                http_response_code(404);
-                echo json_encode(['message' => 'Author Not Updated']);
-            }
-        } else {
-            http_response_code(400);
-            echo json_encode(['message' => 'Missing Required Parameters']);
-        }
-        break;
-
+        include 'update.php';  break;
     case 'DELETE':
-        $data = json_decode(file_get_contents("php://input"));
-
-        if (!empty($data->id)) {
-            $author->id = $data->id;
-
-            if ($author->delete()) {
-                http_response_code(200);
-                echo json_encode(['id' => $author->id]);
-            } else {
-                http_response_code(404);
-                echo json_encode(['message' => 'Author Not Found']);
-            }
-        } else {
-            http_response_code(400);
-            echo json_encode(['message' => 'Missing Required Parameters']);
-        }
-        break;
-
+        include 'delete.php';  break;
     default:
+        // If an unsupported method is called, return 405 Method Not Allowed
         http_response_code(405);
         echo json_encode(['message' => 'Method Not Allowed']);
-        break;
 }
