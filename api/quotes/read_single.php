@@ -2,8 +2,8 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
-include_once '../config/Database.php';
-include_once 'Quote.php';
+include_once __DIR__ . '/../../config/Database.php';
+include_once __DIR__ . '/../../models/Quote.php';
 
 $database = new Database();
 $db = $database->connect();
