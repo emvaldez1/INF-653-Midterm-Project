@@ -16,19 +16,19 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
         if (isset($_GET['id'])) {
-            include 'read_single.php';
+            require 'read_single.php';
         } else {
-            include 'read.php';
+            require 'read.php';
         }
         break;
     case 'POST':
-        include 'create.php';
+        require 'create.php';
         break;
     case 'PUT':
-        include 'update.php';
+        require 'update.php';
         break;
     case 'DELETE':
-        include 'delete.php';
+        require 'delete.php';
         break;
     default:
         http_response_code(405);
