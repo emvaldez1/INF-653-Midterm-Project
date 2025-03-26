@@ -16,12 +16,44 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
-        $quote->id = $_GET['id'] ?? null;
-        $quote->author_id = $_GET['author_id'] ?? null;
-        $quote->category_id = $_GET['category_id'] ?? null;
-        $response = $quote->id ? $quote->readSingle() : $quote->read();
-        http_response_code(200);
-        echo json_encode($response);
+        if (isset($_GET['id'])) {
+            $quote->id = $_GET['id'];
+            $quote->readSingle();
+            if ($quote->quote) {
+                http_response_code(200);
+                echo json_encode([
+                    'id' => $quote->id,
+                    'quote' => $quote->quote,
+                    'author' => $quote->author_name,
+                    'category' => $quote->category_name
+                ]);
+            } else {
+                http_response_code(404);
+                echo json_encode(['message' => 'No Quotes Found']);
+            }
+        } else {
+            $result = $quote->read();
+            $num = $result->rowCount();
+
+            if ($num > 0) {
+                $quotes_arr = [];
+                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                    extract($row);
+                    $quote_item = [
+                        'id' => $id,
+                        'quote' => $quote,
+                        'author' => $author,
+                        'category' => $category
+                    ];
+                    $quotes_arr[] = $quote_item;
+                }
+                http_response_code(200);
+                echo json_encode($quotes_arr);
+            } else {
+                http_response_code(404);
+                echo json_encode(['message' => 'No Quotes Found']);
+            }
+        }
         break;
 
     case 'POST':
@@ -30,6 +62,7 @@ switch ($method) {
             $quote->quote = $data->quote;
             $quote->author_id = $data->author_id;
             $quote->category_id = $data->category_id;
+
             if ($quote->create()) {
                 http_response_code(201);
                 echo json_encode([
@@ -55,6 +88,7 @@ switch ($method) {
             $quote->quote = $data->quote;
             $quote->author_id = $data->author_id;
             $quote->category_id = $data->category_id;
+
             if ($quote->update()) {
                 http_response_code(200);
                 echo json_encode([
@@ -65,7 +99,7 @@ switch ($method) {
                 ]);
             } else {
                 http_response_code(404);
-                echo json_encode(['message' => 'Quote Not Found']);
+                echo json_encode(['message' => 'Quote Not Updated']);
             }
         } else {
             http_response_code(400);
@@ -77,12 +111,13 @@ switch ($method) {
         $data = json_decode(file_get_contents("php://input"));
         if (!empty($data->id)) {
             $quote->id = $data->id;
+
             if ($quote->delete()) {
                 http_response_code(200);
                 echo json_encode(['id' => $quote->id]);
             } else {
                 http_response_code(404);
-                echo json_encode(['message' => 'Quote Not Found']);
+                echo json_encode(['message' => 'No Quotes Found']);
             }
         } else {
             http_response_code(400);
