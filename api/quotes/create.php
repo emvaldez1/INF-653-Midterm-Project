@@ -1,8 +1,4 @@
 <?php
-
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: POST');
@@ -24,6 +20,7 @@ if (!empty($data->quote) && !empty($data->author_id) && !empty($data->category_i
     $quote->category_id = $data->category_id;
 
     if ($quote->create()) {
+        http_response_code(201); // Created
         echo json_encode([
             'id' => $quote->id,
             'quote' => $quote->quote,
@@ -31,8 +28,10 @@ if (!empty($data->quote) && !empty($data->author_id) && !empty($data->category_i
             'category_id' => $quote->category_id
         ]);
     } else {
+        http_response_code(500); // Internal Server Error
         echo json_encode(['message' => 'Quote Not Created']);
     }
 } else {
+    http_response_code(400); // Bad Request
     echo json_encode(['message' => 'Missing Required Parameters']);
 }
