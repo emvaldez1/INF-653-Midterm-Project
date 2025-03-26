@@ -7,88 +7,64 @@ class Quote {
     public $quote;
     public $author_id;
     public $category_id;
-    public $author;
-    public $category;
+    public $author_name;
+    public $category_name;
 
     public function __construct($db) {
         $this->conn = $db;
     }
 
     public function read() {
-        $query = "SELECT q.id, q.quote, a.author, c.category
-                  FROM {$this->table} q
-                  LEFT JOIN authors a ON q.author_id = a.id
-                  LEFT JOIN categories c ON q.category_id = c.id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt;
+        $query = 'SELECT q.id, q.quote, a.author AS author, c.category AS category
+                  FROM quotes q
+                  JOIN authors a ON q.author_id = a.id
+                  JOIN categories c ON q.category_id = c.id';
+        return $this->conn->query($query);
     }
 
     public function readSingle() {
-        $query = "SELECT q.id, q.quote, a.author, c.category
-                  FROM {$this->table} q
-                  LEFT JOIN authors a ON q.author_id = a.id
-                  LEFT JOIN categories c ON q.category_id = c.id
-                  WHERE q.id = :id LIMIT 1";
+        $query = 'SELECT q.id, q.quote, a.author AS author, c.category AS category
+                  FROM quotes q
+                  JOIN authors a ON q.author_id = a.id
+                  JOIN categories c ON q.category_id = c.id
+                  WHERE q.id = :id';
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $this->id);
-        $stmt->execute();
+        $stmt->execute([':id' => $this->id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
+        
         if ($row) {
             $this->quote = $row['quote'];
-            $this->author = $row['author'];
-            $this->category = $row['category'];
+            $this->author_name = $row['author'];
+            $this->category_name = $row['category'];
         }
     }
 
     public function create() {
-        $query = "INSERT INTO {$this->table} (quote, author_id, category_id) 
-                  VALUES (:quote, :author_id, :category_id) RETURNING id";
+        $query = 'INSERT INTO quotes (quote, author_id, category_id) VALUES (:quote, :author_id, :category_id) RETURNING id';
         $stmt = $this->conn->prepare($query);
-
-        $this->quote = htmlspecialchars(strip_tags($this->quote));
-        $this->author_id = htmlspecialchars(strip_tags($this->author_id));
-        $this->category_id = htmlspecialchars(strip_tags($this->category_id));
-
-        $stmt->bindParam(':quote', $this->quote);
-        $stmt->bindParam(':author_id', $this->author_id);
-        $stmt->bindParam(':category_id', $this->category_id);
-
-        if ($stmt->execute()) {
-            $this->id = $stmt->fetchColumn();
-            return true;
-        }
-
-        return false;
+        $stmt->execute([
+            ':quote' => $this->quote,
+            ':author_id' => $this->author_id,
+            ':category_id' => $this->category_id
+        ]);
+        $this->id = $stmt->fetchColumn();
+        return $this->id ? true : false;
     }
 
     public function update() {
-        $query = "UPDATE {$this->table}
-                  SET quote = :quote, author_id = :author_id, category_id = :category_id
-                  WHERE id = :id";
+        $query = 'UPDATE quotes SET quote = :quote, author_id = :author_id, category_id = :category_id WHERE id = :id';
         $stmt = $this->conn->prepare($query);
-
-        $this->quote = htmlspecialchars(strip_tags($this->quote));
-        $this->author_id = htmlspecialchars(strip_tags($this->author_id));
-        $this->category_id = htmlspecialchars(strip_tags($this->category_id));
-        $this->id = htmlspecialchars(strip_tags($this->id));
-
-        $stmt->bindParam(':quote', $this->quote);
-        $stmt->bindParam(':author_id', $this->author_id);
-        $stmt->bindParam(':category_id', $this->category_id);
-        $stmt->bindParam(':id', $this->id);
-
-        return $stmt->execute();
+        return $stmt->execute([
+            ':quote' => $this->quote,
+            ':author_id' => $this->author_id,
+            ':category_id' => $this->category_id,
+            ':id' => $this->id
+        ]);
     }
 
     public function delete() {
-        $query = "DELETE FROM {$this->table} WHERE id = :id";
+        $query = 'DELETE FROM quotes WHERE id = :id';
         $stmt = $this->conn->prepare($query);
-
-        $this->id = htmlspecialchars(strip_tags($this->id));
-        $stmt->bindParam(':id', $this->id);
-
-        return $stmt->execute();
+        return $stmt->execute([':id' => $this->id]);
     }
 }
