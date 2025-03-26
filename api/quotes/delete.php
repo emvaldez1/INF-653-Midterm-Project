@@ -4,8 +4,8 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: DELETE');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-include_once __DIR__ . '/../../config/Database.php';
-include_once __DIR__ . '/../../models/Quote.php';
+include_once '../../config/Database.php';
+include_once '../../models/Quote.php';
 
 $database = new Database();
 $db = $database->connect();
@@ -17,11 +17,11 @@ $data = json_decode(file_get_contents("php://input"));
 if (!empty($data->id)) {
     $quote->id = $data->id;
 
-    if($quote->delete()) {
-        echo json_encode(array('message' => 'Quote Deleted'));
+    if ($quote->delete()) {
+        echo json_encode(['id' => $quote->id]);
     } else {
-        echo json_encode(array('message' => 'Quote Not Deleted'));
+        echo json_encode(['message' => 'No Quotes Found']);
     }
 } else {
-    echo json_encode(array('message' => 'Quote ID Not Provided'));
+    echo json_encode(['message' => 'Missing Required Parameters']);
 }
