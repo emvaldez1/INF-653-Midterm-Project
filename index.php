@@ -1,4 +1,8 @@
 <?php
+
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
 header('Content-Type: application/json');
 
 $request = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
