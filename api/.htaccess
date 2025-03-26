@@ -1,4 +1,15 @@
+# Enable rewrite engine
 RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
+
+# Serve existing files directly
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Route requests starting with api/ to the appropriate index files
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteRule ^api/(.+)/?$ /api/$1/index.php [L,QSA]
+
+# If no file or directory matched, route everything to index.php
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ api/index.php [QSA,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^.*$ index.php [L,QSA]
