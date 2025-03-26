@@ -1,30 +1,9 @@
 <?php
-
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-
+// File: index.php (top-level)
 header('Content-Type: application/json');
 
-$requestUri = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
-$apiIndex = array_search('api', $requestUri);
-
-if (isset($requestUri[$apiIndex + 1])) {
-    $resource = $requestUri[$apiIndex + 1];
-    switch ($resource) {
-        case 'authors':
-            require 'authors/index.php';
-            break;
-        case 'categories':
-            require 'categories/index.php';
-            break;
-        case 'quotes':
-            require 'quotes/index.php';
-            break;
-        default:
-            http_response_code(404);
-            echo json_encode(['message' => 'Resource not found']);
-            break;
-    }
-} else {
-    echo json_encode(['message' => 'No resource specified']);
-}
+// Optionally, you might want to list available endpoints or provide a basic message.
+echo json_encode([
+    'message' => 'Welcome to the Quotes API. Available endpoints: /api/quotes, /api/authors, /api/categories'
+]);
+?>
