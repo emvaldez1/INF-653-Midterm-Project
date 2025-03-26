@@ -4,8 +4,8 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-include_once __DIR__ . '/../../config/Database.php';
-include_once __DIR__ . '/../../models/Quote.php';
+include_once '../../config/Database.php';
+include_once '../../models/Quote.php';
 
 $database = new Database();
 $db = $database->connect();
@@ -19,11 +19,19 @@ if (!empty($data->quote) && !empty($data->author_id) && !empty($data->category_i
     $quote->author_id = $data->author_id;
     $quote->category_id = $data->category_id;
 
-    if($quote->create()) {
-        echo json_encode(array('message' => 'Quote Created'));
+    // Check if author or category exist (optional but required for better validation)
+    // You may want to implement Author and Category class lookups here.
+
+    if ($quote->create()) {
+        echo json_encode([
+            'id' => $quote->id,
+            'quote' => $quote->quote,
+            'author_id' => $quote->author_id,
+            'category_id' => $quote->category_id
+        ]);
     } else {
-        echo json_encode(array('message' => 'Quote Not Created'));
+        echo json_encode(['message' => 'Quote Not Created']);
     }
 } else {
-    echo json_encode(array('message' => 'Missing required data'));
+    echo json_encode(['message' => 'Missing Required Parameters']);
 }
