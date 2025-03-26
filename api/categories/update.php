@@ -1,34 +1,25 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: PUT');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
-
-include_once '../../config/Database.php';
-include_once '../../models/Category.php';
-
-$database = new Database();
-$db = the database->connect();
-
-$category = new Category($db);
-
-data = json_decode(file_get_contents("php://input"));
-
+$data = json_decode(file_get_contents("php://input"));
 if (!empty($data->id) && !empty($data->category)) {
-    $category->id = $data->id;
+    $category->id = intval($data->id);
     $category->category = $data->category;
-
-    if ($category->update()) {
-        http_response_code(200);
-        echo json_encode([
-            'id' => $category->id,
-            'category' => $category->category
-        ]);
-    } else {
+    if (!$category->read_single()) {
         http_response_code(404);
-        echo json_encode(['message' => 'Category Not Updated']);
+        echo json_encode(['message' => 'categoryId Not Found']);
+    } else {
+        if ($category->update()) {
+            echo json_encode([
+                'id' => $category->id,
+                'category' => $category->category
+            ]);
+        } else {
+            echo json_encode(['message' => 'Category Not Updated']);
+            http_response_code(500);
+        }
     }
 } else {
-    http_response_code(400);
     echo json_encode(['message' => 'Missing Required Parameters']);
+    http_response_code(400);
 }
+exit();
+?>
