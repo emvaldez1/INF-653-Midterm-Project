@@ -1,5 +1,8 @@
 <?php
-// Example structure for `index.php` in `/api`
+
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
 header('Content-Type: application/json');
 
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
