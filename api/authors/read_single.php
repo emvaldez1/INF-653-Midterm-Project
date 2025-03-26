@@ -1,42 +1,40 @@
 <?php
+// Headers
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
-include_once '../../config/Database.php';
-include_once '../../models/Author.php';
+include_once __DIR__ . '/../../config/Database.php';
+include_once __DIR__ . '/../../models/Author.php';
 
-// Initialize the database and connect
+// Instantiate DB & connect
 $database = new Database();
 $db = $database->connect();
 
-// Check if the database connection was successful
-if (!$db) {
-    http_response_code(500); // Internal Server Error
-    echo json_encode(['message' => 'Database connection failed']);
-    exit;
-}
-
+// Instantiate an author object
 $author = new Author($db);
 
-// Check if ID is provided and is a valid number
-if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
-    http_response_code(400); // Bad Request
-    echo json_encode(['message' => 'Missing or invalid ID']);
-    exit;
-}
+// Get ID from URL
+$author->id = isset($_GET['id']) ? $_GET['id'] : die();
 
-$author->id = $_GET['id'];
+// Get author
 $author->readSingle();
 
-// Check if an author was found
-if ($author->author != null) {
-    $author_arr = [
+if($author->name != null) {
+    // Create array
+    $author_arr = array(
         'id' => $author->id,
-        'author' => $author->author
-    ];
-    http_response_code(200); // OK
+        'author' => $author->name
+    );
+
+    // Set response code - 200 OK
+    http_response_code(200);
+
+    // Make it json format
     echo json_encode($author_arr);
 } else {
-    http_response_code(404); // Not Found
-    echo json_encode(['message' => 'Author Not Found with ID ' . $author->id]);
+    // Set response code - 404 Not found
+    http_response_code(404);
+
+    // Author not found
+    echo json_encode(array('message' => 'Author Not Found'));
 }
