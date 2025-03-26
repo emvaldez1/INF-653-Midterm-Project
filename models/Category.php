@@ -20,9 +20,8 @@ class Category {
     public function create() {
         $query = 'INSERT INTO ' . $this->table_name . ' (category) VALUES (:category)';
         $stmt = $this->conn->prepare($query);
-        $this->category = htmlspecialchars(strip_tags($this->category));
-        $stmt->bindParam(':category', $this->category);
-
+        $this->category = htmlspecialchars(strip_tags(this->category));
+        $stmt->bindParam(':category', this->category);
         if ($stmt->execute()) {
             return true;
         }
@@ -32,10 +31,10 @@ class Category {
     public function update() {
         $query = 'UPDATE ' . $this->table_name . ' SET category = :category WHERE id = :id';
         $stmt = $this->conn->prepare($query);
+        $this->id = htmlspecialchars(strip_tags($this->id));
         $this->category = htmlspecialchars(strip_tags($this->category));
-        $stmt->bindParam(':category', $this->category);
         $stmt->bindParam(':id', $this->id);
-
+        $stmt->bindParam(':category', $this->category);
         if ($stmt->execute()) {
             return true;
         }
@@ -46,7 +45,6 @@ class Category {
         $query = 'DELETE FROM ' . $this->table_name . ' WHERE id = :id';
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $this->id);
-
         if ($stmt->execute()) {
             return true;
         }
