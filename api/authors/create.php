@@ -4,17 +4,27 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-include_once __DIR__ . '/../../config/Database.php';
-include_once __DIR__ . '/../../models/Author.php';
+include_once '../../config/Database.php';
+include_once '../../models/Author.php';
 
 $database = new Database();
 $db = $database->connect();
-$author = new Author($db);
-$data = json_decode(file_get_contents("php://input"));
-$author->author = $data->author;
 
-if($author->create()) {
-    echo json_encode(array('message' => 'Author Created'));
+$author = new Author($db);
+
+$data = json_decode(file_get_contents("php://input"));
+
+if (!empty($data->author)) {
+    $author->author = $data->author;
+
+    if ($author->create()) {
+        echo json_encode([
+            'id' => $author->id,
+            'author' => $author->author
+        ]);
+    } else {
+        echo json_encode(['message' => 'Author Not Created']);
+    }
 } else {
-    echo json_encode(array('message' => 'Author Not Created'));
+    echo json_encode(['message' => 'Missing Required Parameters']);
 }
