@@ -1,27 +1,29 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-
-include_once __DIR__ . '/../../config/Database.php';
-include_once __DIR__ . '/../../models/Category.php';
-
-$database = new Database();
-$db = $database->connect();
-
-$category = new Category($db);
-$result = $category->read();
-$num = $result->rowCount();
-
-if ($num > 0) {
-    $categories_arr = array();
-    $categories_arr['data'] = array();
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        extract(row);
-        $category_item = array('id' => $id, 'category' => $category);
-        array_push($categories_arr['data'], $category_item);
+if (isset($_GET['id'])) {
+    $category->id = intval($_GET['id']);
+    if ($category->read_single()) {
+        echo json_encode([
+            'id' => $category->id,
+            'category' => $category->category
+        ]);
+    } else {
+        http_response_code(404);
+        echo json_encode(['message' => 'categoryId Not Found']);
     }
-    echo json_encode($categories_arr);
 } else {
-    http_response_code(404);
-    echo json_encode(['message' => 'No Categories Found']);
+    $result = $category->read();
+    $rowCount = $result->rowCount();
+    if ($rowCount > 0) {
+        $categoriesArr = [];
+        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+            $categoriesArr[] = [
+                'id' => $row['id'],
+                'category' => $row['category']
+            ];
+        }
+        echo json_encode($categoriesArr);
+    } else {
+        echo json_encode(['message' => 'No Categories Found']);
+    }
 }
+exit();
