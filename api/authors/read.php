@@ -1,27 +1,34 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-
-include_once __DIR__ . '/../../config/Database.php';
-include_once __DIR__ . '/../../models/Author.php';
-
-$database = new Database();
-$db = $database->connect();
-
-$author = new Author($db);
-$result = $author->read();
-$num = $result->rowCount();
-
-if ($num > 0) {
-    $authors_arr = array();
-    $authors_arr['data'] = array();
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        extract($row);
-        $author_item = array('id' => $id, 'author' => $author);
-        array_push($authors_arr['data'], $author_item);
+// If an 'id' parameter is present, delegate to read a single author
+if (isset($_GET['id'])) {
+    // Prepare the author with the given id
+    $author->id = intval($_GET['id']);
+    if ($author->read_single()) {
+        // Author found, output JSON
+        echo json_encode([
+            'id' => $author->id,
+            'author' => $author->author
+        ]);
+    } else {
+        // Author not found
+        http_response_code(404);
+        echo json_encode(['message' => 'authorId Not Found']);
     }
-    echo json_encode($authors_arr);
 } else {
-    http_response_code(404);
-    echo json_encode(['message' => 'No Authors Found']);
+    // No ID specified: retrieve all authors
+    $result = $author->read();
+    $rowCount = $result->rowCount();
+    if ($rowCount > 0) {
+        $authorsArr = [];
+        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+            $authorsArr[] = [
+                'id' => $row['id'],
+                'author' => $row['author']
+            ];
+        }
+        echo json_encode($authorsArr);
+    } else {
+        echo json_encode(['message' => 'No Authors Found']);
+    }
 }
+exit();
