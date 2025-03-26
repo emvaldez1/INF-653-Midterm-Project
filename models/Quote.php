@@ -135,3 +135,4 @@ class Quote {
         return $stmt->execute();
     }
 }
+?>
