@@ -18,11 +18,11 @@ if (!empty($data->author)) {
     if ($author->create()) {
         http_response_code(201);
         echo json_encode([
-            'id' => $db->lastInsertId(),
+            'id' => $db->lastInsertId(), // Assuming you are using MySQL. Adjust if using another DBMS
             'author' => $author->author
         ]);
     } else {
-        http_response_code(500);
+        http_response_code(503);
         echo json_encode(['message' => 'Author Not Created']);
     }
 } else {
