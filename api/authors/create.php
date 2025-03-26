@@ -1,8 +1,4 @@
 <?php
-
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: POST');
@@ -22,13 +18,16 @@ if (!empty($data->author)) {
     $author->author = $data->author;
 
     if ($author->create()) {
+        http_response_code(201); // HTTP 201 Created
         echo json_encode([
             'id' => $author->id,
             'author' => $author->author
         ]);
     } else {
+        http_response_code(500); // HTTP 500 Internal Server Error
         echo json_encode(['message' => 'Author Not Created']);
     }
 } else {
+    http_response_code(400); // HTTP 400 Bad Request
     echo json_encode(['message' => 'Missing Required Parameters']);
 }
