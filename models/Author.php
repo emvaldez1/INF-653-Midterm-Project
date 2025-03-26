@@ -67,3 +67,4 @@ class Author {
         return $stmt->execute();
     }
 }
+?>
