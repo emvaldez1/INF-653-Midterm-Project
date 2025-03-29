@@ -1,5 +1,4 @@
 <?php
-// CORS and content-type headers
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 $method = $_SERVER['REQUEST_METHOD'];
@@ -13,18 +12,14 @@ if ($method === 'OPTIONS') {
 include_once '../../config/Database.php';
 include_once '../../models/Category.php';
 
-// Instantiate DB & connect
 $database = new Database();
 $db = $database->connect();
 
-// Instantiate category object
 $category = new Category($db);
 
-// Check if ID is provided for single category
 $id = isset($_GET['id']) ? $_GET['id'] : null;
 
 if ($id) {
-    $category->id = $id;
     if ($category->read_single()) {
         $category_arr = array(
             'id' => $category->id,
@@ -33,12 +28,11 @@ if ($id) {
         echo json_encode($category_arr);
     } else {
         http_response_code(404);
-        echo json_encode(['message' => 'category_id Not Found']);
+        echo json_encode(['message' => 'Category Not Found']);
     }
 } else {
     $result = $category->read();
     $categories_arr = array();
-    $categories_arr['data'] = array();
 
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
         extract($row);
@@ -46,9 +40,8 @@ if ($id) {
             'id' => $id,
             'category' => $category
         );
-        array_push($categories_arr['data'], $category_item);
+        array_push($categories_arr, $category_item);
     }
-
     echo json_encode($categories_arr);
 }
 ?>
