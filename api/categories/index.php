@@ -1,5 +1,15 @@
 <?php
+// CORS and content-type headers
+header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
+$method = $_SERVER['REQUEST_METHOD'];
+
+if ($method === 'OPTIONS') {
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+    header('Access-Control-Allow-Headers: Origin, Accept, Content-Type, X-Requested-With');
+    exit();
+}
+
 include_once '../../config/Database.php';
 include_once '../../models/Category.php';
 
@@ -7,10 +17,10 @@ include_once '../../models/Category.php';
 $database = new Database();
 $db = $database->connect();
 
-// Instantiate a category object
+// Instantiate category object
 $category = new Category($db);
 
-// Check if ID is provided for single category, else get all
+// Check if ID is provided for single category
 $id = isset($_GET['id']) ? $_GET['id'] : null;
 
 if ($id) {
@@ -23,7 +33,7 @@ if ($id) {
         echo json_encode($category_arr);
     } else {
         http_response_code(404);
-        echo json_encode(['message' => 'Category Not Found']);
+        echo json_encode(['message' => 'category_id Not Found']);
     }
 } else {
     $result = $category->read();
