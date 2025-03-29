@@ -49,6 +49,6 @@ if ($id) {
         array_push($authors_arr['data'], $author_item);
     }
     
-    echo json_encode($quotes_arr['data']);
+    echo json_encode($authors_arr['data']);
 }
 ?>
