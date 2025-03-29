@@ -12,14 +12,17 @@ if ($method === 'OPTIONS') {
 include_once '../../config/Database.php';
 include_once '../../models/Author.php';
 
+// Instantiate DB & connect
 $database = new Database();
 $db = $database->connect();
 
+// Instantiate author object
 $author = new Author($db);
 
 $id = isset($_GET['id']) ? $_GET['id'] : null;
 
 if ($id) {
+    $author->id = $id;
     if ($author->read_single()) {
         $author_arr = array(
             'id' => $author->id,
@@ -32,16 +35,24 @@ if ($id) {
     }
 } else {
     $result = $author->read();
-    $authors_arr = array();
+    $num = $result->rowCount();
 
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        extract($row);
-        $author_item = array(
-            'id' => $id,
-            'author' => $author
-        );
-        array_push($authors_arr, $author_item);
+    if ($num > 0) {
+        $authors_arr = array();
+
+        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+            extract($row);
+            $author_item = array(
+                'id' => $id,
+                'author' => $author
+            );
+            $authors_arr[] = $author_item; // Changed from array_push for performance
+        }
+
+        echo json_encode($authors_arr); // Directly returning the array
+    } else {
+        http_response_code(404);
+        echo json_encode(['message' => 'No Authors Found']);
     }
-    echo json_encode($authors_arr);
 }
 ?>
