@@ -1,5 +1,15 @@
 <?php
+// CORS and content-type headers
+header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
+$method = $_SERVER['REQUEST_METHOD'];
+
+if ($method === 'OPTIONS') {
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+    header('Access-Control-Allow-Headers: Origin, Accept, Content-Type, X-Requested-With');
+    exit();
+}
+
 include_once '../../config/Database.php';
 include_once '../../models/Author.php';
 
@@ -23,7 +33,7 @@ if ($id) {
         echo json_encode($author_arr);
     } else {
         http_response_code(404);
-        echo json_encode(['message' => 'Author Not Found']);
+        echo json_encode(['message' => 'author_id Not Found']);
     }
 } else {
     $result = $author->read();
