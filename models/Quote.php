@@ -25,23 +25,37 @@ class Quote {
         return $stmt;
     }
 
-    // Read a single quote by ID
-    public function read_single() {
-        $query = 'SELECT q.id, q.quote, a.author, c.category FROM ' . $this->table . ' q
+    // Read filtered quotes based on author, category, and randomness
+    public function read_filtered($author_id = null, $category_id = null, $random = null) {
+        $query = "SELECT q.id, q.quote, a.author, c.category
+                  FROM " . $this->table . " q
                   JOIN authors a ON q.author_id = a.id
-                  JOIN categories c ON q.category_id = c.id
-                  WHERE q.id = ? LIMIT 0,1';
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->id);
-        $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if($row) {
-            $this->quote = $row['quote'];
-            $this->author_id = $row['author'];
-            $this->category_id = $row['category'];
-            return true;
+                  JOIN categories c ON q.category_id = c.id";
+        
+        $conditions = [];
+        if (!empty($author_id)) {
+            $conditions[] = "q.author_id = :author_id";
         }
-        return false;
+        if (!empty($category_id)) {
+            $conditions[] = "q.category_id = :category_id";
+        }
+        if (!empty($conditions)) {
+            $query .= " WHERE " . implode(' AND ', $conditions);
+        }
+        if ($random === 'true') {
+            $query .= " ORDER BY RAND() LIMIT 1";
+        }
+
+        $stmt = $this->conn->prepare($query);
+        if (!empty($author_id)) {
+            $stmt->bindParam(':author_id', $author_id);
+        }
+        if (!empty($category_id)) {
+            $stmt->bindParam(':category_id', $category_id);
+        }
+
+        $stmt->execute();
+        return $stmt;
     }
 
     // Create a new quote
